@@ -11,7 +11,29 @@ type User struct {
 }
 
 type AnimeResponse struct {
-	Data       json.RawMessage `json:"data"`
-	IsInList   bool            `json:"isInList,omitempty"`
-	IsFavorite bool            `json:"isFavorite,omitempty"`
+	Anime      json.RawMessage `json:"anime"`
+	IsInList   bool            `json:"isInList"`
+	IsFavorite bool            `json:"isFavorite"`
+}
+
+type Anime struct {
+	ID       int    `json:"mal_id"`
+	Title    string `json:"title"`
+	Image    string `json:"image_url"`
+	Episodes int    `json:"episodes"`
+}
+
+type AnimeData struct {
+	MalID  int    `json:"mal_id"`
+	Title  string `json:"title"`
+	Images struct {
+		JPG struct {
+			ImageURL string `json:"image_url"`
+		} `json:"jpg"`
+	} `json:"images"`
+	Episodes int `json:"episodes"`
+}
+
+type AnimeJikanResponse struct {
+	Data AnimeData `json:"data"`
 }

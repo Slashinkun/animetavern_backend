@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"main/models"
 	"main/services"
-	"strconv"
-
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -31,9 +33,11 @@ func fetchAnime(id int) ([]byte, error) {
 }
 
 func GetAnimePage(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != http.MethodPost {
-
+	var inList bool = false
+	var inFavorite bool = false
+	if r.Method != http.MethodGet {
+		http.Error(w, "Non autorisé", http.StatusBadRequest)
+		return
 	}
 
 	//temporaire pour eviter le pb du CORS
@@ -51,16 +55,87 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	idStr, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, "id non conforme", http.StatusBadRequest)
+		return
 	}
-	response, err := fetchAnime(idStr)
+	animedata, err := fetchAnime(idStr)
+
+	//fmt.Println(string(animedata))
+
+	var resp models.AnimeJikanResponse
+	err = json.Unmarshal(animedata, &resp)
+	if err != nil {
+		fmt.Println("Erreur JSON:", err)
+		http.Error(w, "Erreur décodage API", http.StatusInternalServerError)
+		return
+	}
+
+	anime := resp.Data
+
+	services.PutAnimeInCache(idStr, anime.Title, anime.Images.JPG.ImageURL, anime.Episodes)
 
 	if err != nil {
 		http.Error(w, "erreur api jikan", http.StatusNotFound)
+		return
 	}
+
+	username := r.Context().Value("username")
+
+	if username != nil {
+		username := username.(string)
+		inList = services.IsAnimeInUserList(username, idStr)
+		inFavorite = services.IsAnimeUserFavorite(username, idStr)
+
+	}
+
+	//on génere la réponse
+	data := models.AnimeResponse{
+		Anime:      animedata,
+		IsInList:   inList,
+		IsFavorite: inFavorite,
+	}
+
+	//on la transforme en JSON
+	response, err := json.Marshal(data)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(response)
 
+}
+
+func Search(w http.ResponseWriter, r *http.Request) {
+
+	//temporaire pour eviter le pb du CORS
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "Non autorisé", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		http.Error(w, "Paramètre query manquant", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := http.Get("https://api.jikan.moe/v4/anime?q=" + url.QueryEscape(query) + "&limit=10")
+	if err != nil {
+		http.Error(w, "Erreur API Jikan", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, "Erreur lecture API Jikan", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
 
 // POST /register

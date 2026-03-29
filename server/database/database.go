@@ -10,8 +10,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var connStr = "user=myuser password=mypassword dbname=animetavern_db sslmode=disable"
-
 var DB *sql.DB
 
 func InitDB() error {
@@ -20,10 +18,10 @@ func InitDB() error {
 	if err1 != nil {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
-	user := os.Getenv("myuser")
-	password := os.Getenv("password")
-	dbname := os.Getenv("dbname")
-	sslmode := os.Getenv("sslmode")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	sslmode := os.Getenv("DB_SSLMODE")
 	conn := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", user, password, dbname, sslmode)
 	DB, err = sql.Open("postgres", conn)
 	return err

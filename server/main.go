@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"main/database"
 	"main/handlers"
+	"main/middleware"
 	"net/http"
 
 	_ "github.com/lib/pq"
@@ -20,11 +21,12 @@ func main() {
 	}
 
 	// routes
-	http.HandleFunc("/anime/", handlers.GetAnimePage)
+	http.HandleFunc("/anime/", middleware.OptionalMiddleware(handlers.GetAnimePage))
 
 	http.HandleFunc("/register", handlers.RegisterHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/logout", handlers.LogoutHandler)
+	http.HandleFunc("/search", handlers.Search)
 
 	fmt.Println("Serveur démarré sur le port 8080...")
 
