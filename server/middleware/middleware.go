@@ -31,18 +31,24 @@ import (
 
 type contextKey string
 
-const UserContextKey = contextKey("user")
+const UserIdKey contextKey = "user_id"
 
 func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("token")
-		if err == nil {
-			if username, err := services.ValidateToken(cookie.Value); err == nil {
-				// mettre le username dans le contexte
-				ctx := context.WithValue(r.Context(), "username", username)
-				r = r.WithContext(ctx)
-			}
+
+		cookie, err := r.Cookie("session_token")
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
 		}
-		next.ServeHTTP(w, r)
+
+		userId, err := services.ValidateToken(cookie.Value)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), UserIdKey, userId)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
