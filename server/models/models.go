@@ -5,9 +5,15 @@ import (
 )
 
 type User struct {
-	id       int
-	username string
-	password string
+	ID       int
+	Username string
+	Password string
+}
+
+type UserData struct {
+	Username  string  `json:"username"`
+	Animes    []Anime `json:"animes"`
+	Favorites []Anime `json:"favoriteAnimes"`
 }
 
 type AnimeResponse struct {
@@ -16,6 +22,7 @@ type AnimeResponse struct {
 	IsFavorite bool            `json:"isFavorite"`
 }
 
+// structure pour le cache
 type Anime struct {
 	ID       int    `json:"mal_id"`
 	Title    string `json:"title"`
@@ -25,7 +32,7 @@ type Anime struct {
 
 type AnimeData struct {
 	MalID  int    `json:"mal_id"`
-	Title  string `json:"title"`
+	Title  string `json:"title_english"`
 	Images struct {
 		JPG struct {
 			ImageURL string `json:"image_url"`
@@ -36,4 +43,9 @@ type AnimeData struct {
 
 type AnimeJikanResponse struct {
 	Data AnimeData `json:"data"`
+}
+
+type MeResponse struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
 }
