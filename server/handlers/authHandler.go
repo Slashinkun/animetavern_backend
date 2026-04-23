@@ -67,11 +67,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    token,
+		Path:     "/",
+		Domain:   "localhost",
 		Expires:  expirationTime,
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
+
+	fmt.Println("SET COOKIE:")
+	fmt.Println("Domain:", http.Cookie{
+		Name: "session_token",
+	}.Domain)
 
 }
 

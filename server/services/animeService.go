@@ -8,19 +8,24 @@ import (
 // regarde si l'anime est deja dans la liste d'utilisateur (pour le bouton ajouter a la liste)
 func IsAnimeInUserList(userId int, animeID int) bool {
 	var exists bool
+
 	query := `
-        SELECT EXISTS(
-            SELECT 1
-            FROM user_anime
-            WHERE anime_id = $1
-              AND user_id = (SELECT id FROM users WHERE username = $2)
-        )
-    `
+		SELECT EXISTS(
+			SELECT 1
+			FROM user_anime
+			WHERE anime_id = $1
+			  AND user_id = $2
+		)
+	`
+
 	err := database.DB.QueryRow(query, animeID, userId).Scan(&exists)
 	if err != nil {
 		fmt.Println("Erreur SQL:", err)
 		return false
 	}
+
+	fmt.Printf("inList : %t\n", exists)
+
 	return exists
 }
 
@@ -64,4 +69,20 @@ func PutAnimeInCache(animeID int, title string, image_url string, episodes int) 
 	if err != nil {
 		fmt.Println("Erreur insertion anime:", err)
 	}
+}
+
+func AddAnimeToUser(userId int, animeId int) error {
+
+	query := `
+	INSERT INTO user_anime (user_id, anime_id, favorite)
+	VALUES ($1, $2, false)
+	ON CONFLICT (user_id, anime_id)
+	DO NOTHING;
+	`
+
+	_, err := database.DB.Exec(query, userId, animeId)
+
+	fmt.Println(err)
+
+	return err
 }

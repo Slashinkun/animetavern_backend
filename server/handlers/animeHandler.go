@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"main/contextkeys"
 	"main/models"
 	"main/services"
 	"net/http"
@@ -91,19 +92,19 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 
 	anime := resp.Data
 
-	//fmt.Println(anime)
-
 	//on met l'anime dans le cache si il est pas deja dans le cache
 	services.PutAnimeInCache(animeId, anime.Title, anime.Images.JPG.ImageURL, anime.Episodes)
 
-	userIdStr := r.Context().Value("id")
+	userId := -1
 
-	if userIdStr != nil {
-		userId, _ := strconv.Atoi(userIdStr.(string))
-		inList = services.IsAnimeInUserList(userId, animeId)
-		inFavorite = services.IsAnimeUserFavorite(userId, animeId)
-
+	if v := r.Context().Value(contextkeys.UserID); v != nil {
+		if id, ok := v.(int); ok {
+			userId = id
+		}
 	}
+	fmt.Printf("userId: %d\n", userId)
+
+	inList = services.IsAnimeInUserList(userId, animeId)
 
 	//on génere la réponse
 	data := models.AnimeResponse{

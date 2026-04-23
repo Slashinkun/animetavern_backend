@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -20,15 +19,15 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(query)
+	//fmt.Println(query)
 
 	url := "https://api.jikan.moe/v4/anime?q=" + url.QueryEscape(query) + "&limit=10"
 
-	fmt.Println(url)
+	//fmt.Println(url)
 
 	resp, err := http.Get(url)
 
-	fmt.Println(resp)
+	//fmt.Println(resp)
 	if err != nil {
 		http.Error(w, "Erreur API externe", http.StatusBadGateway)
 		return

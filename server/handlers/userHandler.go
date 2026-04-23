@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"main/middleware"
+	"main/contextkeys"
 	"main/models"
 	"main/services"
 	"net/http"
@@ -41,7 +41,7 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	var currentUserID int
 	currentUserID = -1
-	if idCtx := r.Context().Value(middleware.UserIdKey); idCtx != nil {
+	if idCtx := r.Context().Value(contextkeys.UserID); idCtx != nil {
 		currentUserID = idCtx.(int)
 	}
 	isUser := (currentUserID == userId)
@@ -64,5 +64,44 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+
+}
+
+func AddAnimeToList(w http.ResponseWriter, r *http.Request) {
+	var body models.RequestBody
+
+	fmt.Println("REQUEST COOKIES:", r.Cookies())
+
+	userId, ok := r.Context().Value(contextkeys.UserID).(int)
+
+	fmt.Println(userId)
+
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, "Invalid body", http.StatusBadRequest)
+		return
+	}
+
+	exists := services.IsAnimeInUserList(userId, body.AnimeID)
+	if exists {
+		http.Error(w, "Anime déjà dans la liste", http.StatusConflict)
+		return
+	}
+
+	err = services.AddAnimeToUser(userId, body.AnimeID)
+	if err != nil {
+		http.Error(w, "Erreur ajout", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Anime ajouté",
+	})
 
 }

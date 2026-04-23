@@ -1,8 +1,6 @@
 package models
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 type User struct {
 	ID       int
@@ -48,4 +46,8 @@ type AnimeJikanResponse struct {
 type MeResponse struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
+}
+
+type RequestBody struct {
+	AnimeID int `json:"anime_id"`
 }

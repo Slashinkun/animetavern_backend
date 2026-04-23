@@ -38,6 +38,8 @@ func main() {
 		middleware.OptionalMiddleware(handlers.GetAnimePage),
 	).Methods("GET", "OPTIONS")
 
+	router.HandleFunc("/user/anime", middleware.AuthMiddleware(handlers.AddAnimeToList)).Methods("POST")
+
 	//user
 	router.HandleFunc(
 		"/user/{id}",

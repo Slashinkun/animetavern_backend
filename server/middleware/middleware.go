@@ -2,41 +2,33 @@ package middleware
 
 import (
 	"context"
+	"fmt"
+	"main/contextkeys"
 	"main/services"
 	"net/http"
+	"reflect"
 )
-
-// // intercepte les requetes afin de verifier que le demandeur est autorisé a obtenir la page
-// func AuthMiddleware(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		cookie, err := r.Cookie("token")
-
-// 		if err != nil {
-// 			// pas connecté, on continue mais sans user
-// 			next.ServeHTTP(w, r)
-// 			return
-// 		}
-
-// 		username, err := services.ValidateToken(cookie.Value)
-// 		if err != nil {
-// 			next.ServeHTTP(w, r)
-// 			return
-// 		}
-
-// 		//on met le nom d'utilisateur dans le contexte
-// 		ctx := context.WithValue(r.Context(), "username", username)
-// 		next.ServeHTTP(w, r.WithContext(ctx))
-// 	})
-// }
-
-type contextKey string
-
-const UserIdKey contextKey = "user_id"
 
 func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		fmt.Println("\n====================")
+		fmt.Println("METHOD:", r.Method)
+		fmt.Println("URL:", r.URL.Path)
+		fmt.Println("Cookie header:", r.Header.Get("Cookie"))
+		fmt.Println("All cookies:", r.Cookies())
+		fmt.Println("====================")
+
+		if r.Method == http.MethodOptions {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		fmt.Println("MIDDLEWARE HIT")
+
+		fmt.Println("COOKIE HEADER RAW:", r.Header.Get("Cookie"))
 		cookie, err := r.Cookie("session_token")
+		fmt.Println(err)
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
@@ -44,11 +36,40 @@ func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		userId, err := services.ValidateToken(cookie.Value)
 		if err != nil {
+			fmt.Println("pas connecté")
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), UserIdKey, userId)
+		fmt.Println("connecté")
+
+		ctx := context.WithValue(r.Context(), contextkeys.UserID, userId)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+}
+
+func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		fmt.Println("Cookies:", r.Cookies())
+
+		cookie, err := r.Cookie("session_token")
+
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		userId, err := services.ValidateToken(cookie.Value)
+		if err != nil {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		fmt.Println("userId type:", reflect.TypeOf(userId), "value:", userId)
+
+		ctx := context.WithValue(r.Context(), contextkeys.UserID, userId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
