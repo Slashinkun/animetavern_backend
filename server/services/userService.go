@@ -9,7 +9,7 @@ import (
 // recuperer les infos de l'utlisateur pour sa page perso
 func GetUserData(userID int) (models.UserData, error) {
 	var data models.UserData
-	data.Animes = []models.Anime{}
+	data.Animes = []models.UserAnime{}
 	data.Favorites = []models.Anime{}
 
 	username, err := GetUsername(userID)
@@ -19,7 +19,7 @@ func GetUserData(userID int) (models.UserData, error) {
 	}
 	data.Username = username
 
-	queryList := `SELECT a.id, a.title, a.episodes, a.image
+	queryList := `SELECT a.id, a.title, a.episodes, a.image, ua.viewed_episodes,ua.status
 				FROM anime a
 				JOIN user_anime ua ON a.id = ua.anime_id
 				WHERE ua.user_id = $1;`
@@ -33,8 +33,8 @@ func GetUserData(userID int) (models.UserData, error) {
 	defer rowsList.Close()
 
 	for rowsList.Next() {
-		var a models.Anime
-		if err := rowsList.Scan(&a.ID, &a.Title, &a.Episodes, &a.Image); err != nil {
+		var a models.UserAnime
+		if err := rowsList.Scan(&a.ID, &a.Title, &a.Episodes, &a.Image, &a.ViewedEpisodes, &a.Status); err != nil {
 			return data, err
 		}
 		data.Animes = append(data.Animes, a)
