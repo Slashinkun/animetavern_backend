@@ -21,7 +21,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Println(query)
 
-	url := "https://api.jikan.moe/v4/anime?q=" + url.QueryEscape(query) + "&limit=10"
+	url := "https://api.jikan.moe/v4/anime?q=" + url.QueryEscape(query) + "&limit=10&sfw"
 
 	//fmt.Println(url)
 
