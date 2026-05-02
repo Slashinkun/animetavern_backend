@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"main/database"
+	"main/models"
 )
 
 // regarde si l'anime est deja dans la liste d'utilisateur (pour le bouton ajouter a la liste)
@@ -37,7 +38,7 @@ func IsAnimeUserFavorite(userID int, animeID int) bool {
             SELECT 1
             FROM user_anime
             WHERE anime_id = $1
-              AND user_id = (SELECT id FROM users WHERE username = $2) AND favorite = true
+              AND user_id = $2 AND favorite = true
         )
     `
 	err := database.DB.QueryRow(query, animeID, userID).Scan(&exists)
@@ -85,4 +86,33 @@ func AddAnimeToUser(userId int, animeId int) error {
 	fmt.Println(err)
 
 	return err
+}
+
+func AddReview(userID int, body models.ReviewBody) error {
+
+	query := `
+    INSERT INTO reviews (user_id, anime_id, content, rating)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (user_id, anime_id)
+    DO UPDATE SET content = $3, rating = $4;`
+
+	_, err := database.DB.Exec(query, userID, body.AnimeID, body.Content, body.Rating)
+
+	fmt.Println(err)
+
+	return err
+}
+
+func AlreadyWroteReview(userID int, animeID int) bool {
+	var exists bool
+	query := "SELECT EXISTS (SELECT 1 from reviews where anime_id=$1 and user_id=$2)"
+	err := database.DB.QueryRow(query, animeID, userID).Scan(&exists)
+
+	if err != nil {
+		fmt.Println("Erreur SQL:", err)
+		return false
+	}
+
+	return exists
+
 }

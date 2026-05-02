@@ -40,6 +40,8 @@ func main() {
 
 	router.HandleFunc("/user/anime", middleware.AuthMiddleware(handlers.AddAnimeToList)).Methods("POST")
 
+	router.HandleFunc("/anime/{id}/reviews", middleware.AuthMiddleware(handlers.AddReview)).Methods("POST", "OPTIONS")
+
 	//user
 	router.HandleFunc(
 		"/user/{id}",

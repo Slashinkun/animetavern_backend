@@ -120,3 +120,44 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 
 }
+
+func AddReview(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("ADD REVIEW")
+
+	var body models.ReviewBody
+
+	userId, ok := r.Context().Value(contextkeys.UserID).(int)
+	fmt.Println(userId)
+
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	fmt.Printf("content : %s , animeid : %d , rating : %d\n", body.Content, body.AnimeID, body.Rating)
+	if err != nil {
+		http.Error(w, "Invalid body", http.StatusBadRequest)
+		return
+	}
+
+	exists := services.AlreadyWroteReview(userId, body.AnimeID)
+	if exists {
+		http.Error(w, "Already wrote a review", http.StatusConflict)
+		return
+	}
+
+	err = services.AddReview(userId, body)
+
+	if err != nil {
+		http.Error(w, "Erreur durant l'ajout de la critique ", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Critique ajouté",
+	})
+
+}

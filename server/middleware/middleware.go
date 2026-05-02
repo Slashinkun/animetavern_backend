@@ -12,12 +12,12 @@ import (
 func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		fmt.Println("\n====================")
-		fmt.Println("METHOD:", r.Method)
-		fmt.Println("URL:", r.URL.Path)
-		fmt.Println("Cookie header:", r.Header.Get("Cookie"))
-		fmt.Println("All cookies:", r.Cookies())
-		fmt.Println("====================")
+		// fmt.Println("\n====================")
+		// fmt.Println("METHOD:", r.Method)
+		// fmt.Println("URL:", r.URL.Path)
+		// fmt.Println("Cookie header:", r.Header.Get("Cookie"))
+		// fmt.Println("All cookies:", r.Cookies())
+		// fmt.Println("====================")
 
 		if r.Method == http.MethodOptions {
 			next.ServeHTTP(w, r)
@@ -53,6 +53,11 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("Cookies:", r.Cookies())
+
+		if r.Method == http.MethodOptions {
+			next.ServeHTTP(w, r)
+			return
+		}
 
 		cookie, err := r.Cookie("session_token")
 
