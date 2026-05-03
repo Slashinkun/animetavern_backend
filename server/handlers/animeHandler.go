@@ -29,7 +29,7 @@ func FetchAnime(id int) ([]byte, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("erreur requete api Jikan: %w", err)
+		return nil, fmt.Errorf("error request api Jikan: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -41,7 +41,7 @@ func FetchAnime(id int) ([]byte, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("erreur lecture reponse Jikan: %w", err)
+		return nil, fmt.Errorf("error reading reponse Jikan: %w", err)
 	}
 
 	return body, nil
@@ -55,7 +55,7 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	var inFavorite bool = false
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "Non autorisé", http.StatusBadRequest)
+		http.Error(w, "Unautorized", http.StatusBadRequest)
 		return
 	}
 
@@ -66,14 +66,14 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println(animeIdStr)
 
 	if animeIdStr == "" {
-		http.Error(w, "ID manquant", http.StatusBadRequest)
+		http.Error(w, "missing ID", http.StatusBadRequest)
 		return
 	}
 
 	animeId, err := strconv.Atoi(animeIdStr)
 
 	if err != nil {
-		http.Error(w, "id non conforme", http.StatusBadRequest)
+		http.Error(w, "not an ID", http.StatusBadRequest)
 		return
 	}
 
@@ -151,13 +151,13 @@ func AddReview(w http.ResponseWriter, r *http.Request) {
 	err = services.AddReview(userId, body)
 
 	if err != nil {
-		http.Error(w, "Erreur durant l'ajout de la critique ", http.StatusInternalServerError)
+		http.Error(w, "Error while adding review ", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Critique ajouté",
+		"message": "Review added",
 	})
 
 }

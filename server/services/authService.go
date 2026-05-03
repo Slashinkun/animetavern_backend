@@ -26,13 +26,13 @@ func Login(email, password string) (string, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("email inexistant")
+			return "", fmt.Errorf("invalid email")
 		}
 		return "", err
 	}
 
 	if err := checkPassword(hashedPassword, password); err != nil {
-		return "", fmt.Errorf("mot de passe incorrect")
+		return "", fmt.Errorf("incorrect password")
 	}
 
 	//err = database.DB.QueryRow("SELECT username FROM users WHERE email=$1").Scan(&username)
@@ -51,7 +51,7 @@ func Login(email, password string) (string, error) {
 func Register(email, username, password string) error {
 	hashedPassword, err := hashPassword(password)
 	if err != nil {
-		return fmt.Errorf("erreur hash password: %w", err)
+		return fmt.Errorf("error hash password: %w", err)
 	}
 
 	//creation de l'utilisateur dans la DB
@@ -65,7 +65,7 @@ func Register(email, username, password string) error {
 	//l'utilisateur existe deja ou l'email est deja utilisé
 	if err != nil {
 		if strings.Contains(err.Error(), "unique constraint") {
-			return fmt.Errorf("email ou username déjà utilisé")
+			return fmt.Errorf("email or username already used")
 		}
 		return err
 	}
@@ -114,7 +114,7 @@ func ValidateToken(tokenString string) (int, error) {
 	//fmt.Print(userIDFloat)
 
 	if !ok {
-		return 0, errors.New("user_id introuvable")
+		return 0, errors.New("user_id not found")
 	}
 
 	return int(userIDFloat), nil

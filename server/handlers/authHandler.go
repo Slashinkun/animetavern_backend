@@ -18,12 +18,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		http.Error(w, "Unauthorized", http.StatusMethodNotAllowed)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Erreur formulaire", 400)
+		http.Error(w, "Error form", 400)
 		return
 	}
 
@@ -32,7 +32,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if username == "" || password == "" || email == "" {
-		http.Error(w, "Username, password ou email vide", 400)
+		http.Error(w, "empty username, password or mail", 400)
 		return
 	}
 
@@ -93,7 +93,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Déconnecté"))
+	w.Write([]byte("Logged out"))
 }
 
 // pour l'authentification
