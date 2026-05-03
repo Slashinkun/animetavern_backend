@@ -8,10 +8,26 @@ type UserData struct {
 	Favorites []Anime     `json:"favoriteAnimes"`
 }
 
+type UserReviews struct {
+	Reviews []AnimeUserReview `json:"reviews"`
+}
+
 type AnimeResponse struct {
 	Anime      json.RawMessage `json:"anime"`
 	IsInList   bool            `json:"isInList"`
 	IsFavorite bool            `json:"isFavorite"`
+	Reviews    []Reviews       `json:"reviews"`
+}
+
+type AnimeUserReview struct {
+	ID         int    `json:"id"`
+	UserID     int    `json:"user_id"`
+	AnimeID    int    `json:"anime_id"`
+	AnimeTitle string `json:"anime_title"`
+	AnimeImage string `json:"anime_image"`
+	Content    string `json:"content"`
+	Rating     int    `json:"rating"`
+	CreatedAt  string `json:"created_at"`
 }
 
 type RequestBody struct {

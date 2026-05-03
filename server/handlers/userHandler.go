@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"main/contextkeys"
@@ -39,6 +40,20 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//gestion cas utilisateur n'existe pas
+	userExists, err := services.GetUserByID(userId)
+
+	if err != nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	if !userExists {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	//on regarde si l'utilisateur qui demande la page est le proprietaire ou pas
 	var currentUserID int
 	currentUserID = -1
 	if idCtx := r.Context().Value(contextkeys.UserID); idCtx != nil {
@@ -48,6 +63,7 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("page id : %d  currentid : %d \n", userId, currentUserID)
 
+	//récupération des données et construction de la reponse
 	userData, err := services.GetUserData(userId)
 	if err != nil {
 		http.Error(w, "error fetching data", http.StatusInternalServerError)
@@ -67,11 +83,51 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
+
+	//preflight
+	if r.Method == http.MethodOptions {
+		//w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	//on recuperer l'id dans l'url
+	vars := mux.Vars(r)
+
+	idStr, ok := vars["id"]
+	if !ok || idStr == "" {
+		http.Error(w, "missing id", http.StatusBadRequest)
+		return
+	}
+
+	userId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	userReviews, err := services.GetUserReviews(userId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "error fetching data", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(userReviews)
+
+}
+
 func AddAnimeToList(w http.ResponseWriter, r *http.Request) {
 	var body models.RequestBody
 
 	fmt.Println("REQUEST COOKIES:", r.Cookies())
 
+	//on recupere l'id depuis les cookies
 	userId, ok := r.Context().Value(contextkeys.UserID).(int)
 
 	fmt.Println(userId)
@@ -87,21 +143,22 @@ func AddAnimeToList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//verif si l'utilisateur a deja l'anime dans sa liste
 	exists := services.IsAnimeInUserList(userId, body.AnimeID)
 	if exists {
-		http.Error(w, "Anime déjà dans la liste", http.StatusConflict)
+		http.Error(w, "Anime already in the list", http.StatusConflict)
 		return
 	}
 
 	err = services.AddAnimeToUser(userId, body.AnimeID)
 	if err != nil {
-		http.Error(w, "Erreur ajout", http.StatusInternalServerError)
+		http.Error(w, "Failed to add anime", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Anime ajouté",
+		"message": "Anime added",
 	})
 
 }

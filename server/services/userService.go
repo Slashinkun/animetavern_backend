@@ -6,6 +6,19 @@ import (
 	"main/models"
 )
 
+func GetUserByID(userID int) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM users where id = $1)`
+	err := database.DB.QueryRow(query, userID).Scan(&exists)
+
+	if err != nil {
+		fmt.Println("Erreur SQL:", err)
+		return false, err
+	}
+
+	return exists, nil
+}
+
 // recuperer les infos de l'utlisateur pour sa page perso
 func GetUserData(userID int) (models.UserData, error) {
 	var data models.UserData
@@ -62,6 +75,57 @@ func GetUserData(userID int) (models.UserData, error) {
 
 	return data, nil
 
+}
+
+// func GetAnimeReviews(animeID int) (models.AnimeReviews,error){
+
+// }
+
+func GetUserReviews(userID int) (models.UserReviews, error) {
+	var data models.UserReviews
+	data.Reviews = []models.AnimeUserReview{}
+
+	query := `
+		SELECT 
+			r.id, r.user_id, r.anime_id,
+    		r.content, r.rating, r.created_at,
+    		a.title, a.image
+		FROM reviews r
+		JOIN anime a ON r.anime_id = a.id
+		WHERE r.user_id = $1;`
+
+	rows, err := database.DB.Query(query, userID)
+
+	if err != nil {
+		return data, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var review models.AnimeUserReview
+
+		err := rows.Scan(
+			&review.ID,
+			&review.UserID,
+			&review.AnimeID,
+			&review.Content,
+			&review.Rating,
+			&review.CreatedAt,
+			&review.AnimeTitle,
+			&review.AnimeImage,
+		)
+		if err != nil {
+			return data, err
+		}
+
+		data.Reviews = append(data.Reviews, review)
+	}
+
+	if err := rows.Err(); err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
 func GetUsername(userId int) (string, error) {

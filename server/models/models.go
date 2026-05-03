@@ -23,3 +23,11 @@ type UserAnime struct {
 	ViewedEpisodes int    `json:"viewed_episodes"`
 	Status         string `json:"status"`
 }
+
+type Reviews struct {
+	ID        int    `json:"id"`
+	UserID    int    `json:"user_id"`
+	Content   string `json:"content"`
+	Rating    int    `json:"rating"`
+	CreatedAt string `json:"created_at"`
+}

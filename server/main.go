@@ -48,6 +48,8 @@ func main() {
 		middleware.OptionalMiddleware(handlers.UserPageHandler),
 	).Methods("GET", "OPTIONS")
 
+	router.HandleFunc("/user/{id}/reviews", middleware.OptionalMiddleware(handlers.UserReviewsHandler)).Methods("GET", "OPTIONS")
+
 	//auth
 	router.HandleFunc("/me", handlers.MeHandler).Methods("GET", "OPTIONS")
 

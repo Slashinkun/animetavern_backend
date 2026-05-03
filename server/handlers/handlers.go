@@ -9,13 +9,13 @@ import (
 func Search(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "Non autorisé", http.StatusMethodNotAllowed)
+		http.Error(w, "Unauthorized", http.StatusMethodNotAllowed)
 		return
 	}
 
 	query := r.URL.Query().Get("query")
 	if query == "" {
-		http.Error(w, "Paramètre query manquant", http.StatusBadRequest)
+		http.Error(w, "missing query parameter", http.StatusBadRequest)
 		return
 	}
 
@@ -29,19 +29,19 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Println(resp)
 	if err != nil {
-		http.Error(w, "Erreur API externe", http.StatusBadGateway)
+		http.Error(w, "Server error", http.StatusBadGateway)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		http.Error(w, "API Jikan indisponible", http.StatusBadGateway)
+		http.Error(w, "Unable to call Jikan API", http.StatusBadGateway)
 		return
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, "Erreur lecture API Jikan", http.StatusInternalServerError)
+		http.Error(w, "Error reading Jikan API", http.StatusInternalServerError)
 		return
 	}
 
