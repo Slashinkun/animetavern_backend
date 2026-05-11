@@ -122,7 +122,7 @@ func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func AddAnimeToList(w http.ResponseWriter, r *http.Request) {
+func AddAnimeToUserList(w http.ResponseWriter, r *http.Request) {
 	var body models.RequestBody
 
 	fmt.Println("REQUEST COOKIES:", r.Cookies())
@@ -150,7 +150,7 @@ func AddAnimeToList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = services.AddAnimeToUser(userId, body.AnimeID)
+	err = services.AddAnimeToUserList(userId, body.AnimeID)
 	if err != nil {
 		http.Error(w, "Failed to add anime", http.StatusInternalServerError)
 		return
@@ -161,4 +161,45 @@ func AddAnimeToList(w http.ResponseWriter, r *http.Request) {
 		"message": "Anime added",
 	})
 
+}
+
+func RemoveAnimeFromList(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+
+	// fmt.Println("vars:", vars)
+	// fmt.Println("id string:", vars["id"])
+
+	idStr, ok := vars["id"]
+	if !ok || idStr == "" {
+		http.Error(w, "missing id", http.StatusBadRequest)
+		return
+	}
+
+	animeId, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := r.Context().Value(contextkeys.UserID).(int)
+
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	exists := services.IsAnimeInUserList(userId, animeId)
+	if !exists {
+		http.Error(w, "Anime not in list", http.StatusConflict)
+		return
+	}
+
+	err = services.RemoveAnimeFromUserList(userId, animeId)
+	if err != nil {
+		http.Error(w, "Failed to remove anime from list", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

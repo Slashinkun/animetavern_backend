@@ -38,9 +38,11 @@ func main() {
 		middleware.OptionalMiddleware(handlers.GetAnimePage),
 	).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/user/anime", middleware.AuthMiddleware(handlers.AddAnimeToList)).Methods("POST")
+	router.HandleFunc("/user/anime", middleware.AuthMiddleware(handlers.AddAnimeToUserList)).Methods("POST")
 
 	router.HandleFunc("/anime/{id}/reviews", middleware.AuthMiddleware(handlers.AddReview)).Methods("POST", "OPTIONS")
+
+	router.HandleFunc("/user/anime/{id}", middleware.AuthMiddleware(handlers.RemoveAnimeFromList)).Methods("DELETE", "OPTIONS")
 
 	//user
 	router.HandleFunc(

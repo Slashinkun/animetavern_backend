@@ -72,7 +72,7 @@ func PutAnimeInCache(animeID int, title string, image_url string, episodes int) 
 	}
 }
 
-func AddAnimeToUser(userId int, animeId int) error {
+func AddAnimeToUserList(userId int, animeId int) error {
 
 	query := `
 	INSERT INTO user_anime (user_id, anime_id, favorite)
@@ -84,6 +84,20 @@ func AddAnimeToUser(userId int, animeId int) error {
 	_, err := database.DB.Exec(query, userId, animeId)
 
 	fmt.Println(err)
+
+	return err
+}
+
+func RemoveAnimeFromUserList(userId int, animeId int) error {
+	query := `
+	DELETE from user_anime WHERE user_id = $1 and anime_id = $2
+	`
+
+	_, err := database.DB.Exec(query, userId, animeId)
+
+	if err != nil {
+		fmt.Println("Erreur suppression anime:", err)
+	}
 
 	return err
 }
