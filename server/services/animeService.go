@@ -25,7 +25,7 @@ func IsAnimeInUserList(userId int, animeID int) bool {
 		return false
 	}
 
-	fmt.Printf("inList : %t\n", exists)
+	//fmt.Printf("inList : %t\n", exists)
 
 	return exists
 }
@@ -72,6 +72,7 @@ func PutAnimeInCache(animeID int, title string, image_url string, episodes int) 
 	}
 }
 
+// ajoute l'anime dans la liste de l'utilisateur
 func AddAnimeToUserList(userId int, animeId int) error {
 
 	query := `
@@ -83,11 +84,12 @@ func AddAnimeToUserList(userId int, animeId int) error {
 
 	_, err := database.DB.Exec(query, userId, animeId)
 
-	fmt.Println(err)
+	//fmt.Println(err)
 
 	return err
 }
 
+// enleve l'anime de la liste de l'utilisateur
 func RemoveAnimeFromUserList(userId int, animeId int) error {
 	query := `
 	DELETE from user_anime WHERE user_id = $1 and anime_id = $2
@@ -102,6 +104,7 @@ func RemoveAnimeFromUserList(userId int, animeId int) error {
 	return err
 }
 
+// ajoute la review de l'utilisateur dans la base de données
 func AddReview(userID int, body models.ReviewBody) error {
 
 	query := `
@@ -112,11 +115,29 @@ func AddReview(userID int, body models.ReviewBody) error {
 
 	_, err := database.DB.Exec(query, userID, body.AnimeID, body.Content, body.Rating)
 
-	fmt.Println(err)
+	//fmt.Println(err)
 
 	return err
 }
 
+func RemoveReview(reviewID int, userID int) error {
+
+	query := `
+	DELETE FROM reviews
+	WHERE id = $1 AND user_id = $2
+	`
+
+	_, err := database.DB.Exec(query, reviewID, userID)
+
+	if err != nil {
+		fmt.Println("Erreur SQL:", err)
+		return err
+	}
+
+	return nil
+}
+
+// verifie si l'utilisateur a deja ecrit une review
 func AlreadyWroteReview(userID int, animeID int) bool {
 	var exists bool
 	query := "SELECT EXISTS (SELECT 1 from reviews where anime_id=$1 and user_id=$2)"
@@ -128,5 +149,31 @@ func AlreadyWroteReview(userID int, animeID int) bool {
 	}
 
 	return exists
+
+}
+
+func IsReviewFromUser(userID int, reviewID int) (bool, error) {
+
+	var exists bool
+
+	query := `
+	SELECT EXISTS(
+		SELECT 1
+		FROM reviews
+		WHERE id = $1 AND user_id = $2
+	)
+	`
+
+	err := database.DB.QueryRow(
+		query,
+		reviewID,
+		userID,
+	).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 
 }

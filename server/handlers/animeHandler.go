@@ -63,8 +63,6 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 
 	animeIdStr := vars["anime_id"]
 
-	//fmt.Println(animeIdStr)
-
 	if animeIdStr == "" {
 		http.Error(w, "missing ID", http.StatusBadRequest)
 		return
@@ -78,8 +76,6 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	animedata, err := FetchAnime(animeId)
-
-	//fmt.Println(string(animedata))
 
 	//on transforme la reponse de l'API faciliter la lecture
 	var resp models.AnimeJikanResponse
@@ -102,7 +98,6 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 			userId = id
 		}
 	}
-	fmt.Printf("userId: %d\n", userId)
 
 	inList = services.IsAnimeInUserList(userId, animeId)
 
@@ -122,8 +117,6 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddReview(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Println("ADD REVIEW")
 
 	var body models.ReviewBody
 
@@ -158,6 +151,51 @@ func AddReview(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Review added",
+	})
+
+}
+
+func RemoveReview(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+
+	reviewID, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		http.Error(w, "Invalid id", http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := r.Context().Value(contextkeys.UserID).(int)
+
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var isUserReview bool
+	isUserReview, err = services.IsReviewFromUser(userId, reviewID)
+
+	if err != nil {
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
+	}
+
+	if !isUserReview {
+		http.Error(w, "Cannot delete others reviews", http.StatusForbidden)
+		return
+	}
+
+	err = services.RemoveReview(reviewID, userId)
+
+	if err != nil {
+		http.Error(w, "Cannot remove the review", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "review deleted",
 	})
 
 }

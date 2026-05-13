@@ -44,6 +44,8 @@ func main() {
 
 	router.HandleFunc("/user/anime/{id}", middleware.AuthMiddleware(handlers.RemoveAnimeFromList)).Methods("DELETE", "OPTIONS")
 
+	router.HandleFunc("/reviews/{id}", middleware.AuthMiddleware(handlers.RemoveReview)).Methods("DELETE", "OPTIONS")
+
 	//user
 	router.HandleFunc(
 		"/user/{id}",
