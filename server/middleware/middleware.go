@@ -9,31 +9,25 @@ import (
 	"reflect"
 )
 
+// filtre invité/connecté mais pas proprio de la page/ proprio de la page
 func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		// fmt.Println("\n====================")
-		// fmt.Println("METHOD:", r.Method)
-		// fmt.Println("URL:", r.URL.Path)
-		// fmt.Println("Cookie header:", r.Header.Get("Cookie"))
-		// fmt.Println("All cookies:", r.Cookies())
-		// fmt.Println("====================")
 
 		if r.Method == http.MethodOptions {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		fmt.Println("MIDDLEWARE HIT")
-
-		fmt.Println("COOKIE HEADER RAW:", r.Header.Get("Cookie"))
 		cookie, err := r.Cookie("session_token")
 		fmt.Println(err)
+
+		// non connecté : guest
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
 		}
 
+		// connecté mais non prorio
 		userId, err := services.ValidateToken(cookie.Value)
 		if err != nil {
 			fmt.Println("pas connecté")
@@ -41,18 +35,17 @@ func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		fmt.Println("connecté")
-
 		ctx := context.WithValue(r.Context(), contextkeys.UserID, userId)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
 
+// filtre page/action protégé seul le proprio peut acceder/faire  a la page/ l'action
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		fmt.Println("Cookies:", r.Cookies())
+		//fmt.Println("Cookies:", r.Cookies())
 
 		if r.Method == http.MethodOptions {
 			next.ServeHTTP(w, r)

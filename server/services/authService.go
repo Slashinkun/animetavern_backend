@@ -103,8 +103,8 @@ func ValidateToken(tokenString string) (int, error) {
 		return secret, nil
 	})
 
-	fmt.Println("CLAIMS:", claims)
-	fmt.Println("USER_ID RAW:", claims["user_id"])
+	// fmt.Println("CLAIMS:", claims)
+	// fmt.Println("USER_ID RAW:", claims["user_id"])
 
 	if err != nil {
 		return 0, err

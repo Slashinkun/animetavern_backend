@@ -36,12 +36,16 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("[INFO] : Attempting register")
+
 	err := services.Register(email, username, password)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), 500)
 		return
 	}
+
+	fmt.Println("[INFO] : Register successful")
 
 	w.WriteHeader(http.StatusCreated)
 
@@ -55,6 +59,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	//connexion
+	fmt.Println("[INFO] : Attempting Login")
 	token, err := services.Login(email, password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -62,6 +67,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	expirationTime := time.Now().Add(24 * time.Hour)
+
+	fmt.Println("[INFO] : Login successsful")
 
 	//ecriture du cookie
 	http.SetCookie(w, &http.Cookie{
@@ -75,10 +82,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	fmt.Println("SET COOKIE:")
-	fmt.Println("Domain:", http.Cookie{
-		Name: "session_token",
-	}.Domain)
+	// fmt.Println("SET COOKIE:")
+	// fmt.Println("Domain:", http.Cookie{
+	// 	Name: "session_token",
+	// }.Domain)
 
 }
 
@@ -86,6 +93,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	//on change le temps d'expiration du cookie pour qu'il disparaisse immediatement
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    "",

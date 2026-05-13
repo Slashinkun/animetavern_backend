@@ -2,6 +2,8 @@ package models
 
 import "encoding/json"
 
+//Structures pour la réponse du serveur (et la réponse de l'API externe)
+
 type UserData struct {
 	Username  string      `json:"username"`
 	Animes    []UserAnime `json:"animes"`

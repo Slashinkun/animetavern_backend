@@ -83,6 +83,7 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// page des reviews ecrit par l'utilisateur
 func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
 
 	//preflight
@@ -125,12 +126,12 @@ func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
 func AddAnimeToUserList(w http.ResponseWriter, r *http.Request) {
 	var body models.RequestBody
 
-	fmt.Println("REQUEST COOKIES:", r.Cookies())
+	//fmt.Println("REQUEST COOKIES:", r.Cookies())
 
 	//on recupere l'id depuis les cookies
 	userId, ok := r.Context().Value(contextkeys.UserID).(int)
 
-	fmt.Println(userId)
+	//fmt.Println(userId)
 
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -143,18 +144,22 @@ func AddAnimeToUserList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//verif si l'utilisateur a deja l'anime dans sa liste
+	//verifie si l'utilisateur a deja l'anime dans sa liste
 	exists := services.IsAnimeInUserList(userId, body.AnimeID)
 	if exists {
 		http.Error(w, "Anime already in the list", http.StatusConflict)
 		return
 	}
 
+	fmt.Println("[INFO] : Trying adding anime with id " + strconv.Itoa(body.AnimeID) + " for user " + strconv.Itoa(userId))
+
 	err = services.AddAnimeToUserList(userId, body.AnimeID)
 	if err != nil {
 		http.Error(w, "Failed to add anime", http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Println("[INFO] : Anime " + strconv.Itoa(body.AnimeID) + " successfuly added for user " + strconv.Itoa(userId))
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{

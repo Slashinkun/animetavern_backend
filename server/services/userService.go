@@ -6,6 +6,7 @@ import (
 	"main/models"
 )
 
+// cherche si l'utilisateur existe
 func GetUserByID(userID int) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM users where id = $1)`
@@ -77,6 +78,7 @@ func GetUserData(userID int) (models.UserData, error) {
 
 }
 
+//A FAIRE ???
 // func GetAnimeReviews(animeID int) (models.AnimeReviews,error){
 
 // }
@@ -130,7 +132,7 @@ func GetUserReviews(userID int) (models.UserReviews, error) {
 
 func GetUsername(userId int) (string, error) {
 	var username string
-	//fmt.Println(username)
+
 	query := `SELECT username FROM users WHERE id = $1`
 	err := database.DB.QueryRow(query, userId).Scan(&username)
 	if err != nil {

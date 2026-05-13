@@ -1,5 +1,7 @@
 package models
 
+// Structure qui represente les tables de base de donnée
+
 type User struct {
 	ID       int
 	Username string
