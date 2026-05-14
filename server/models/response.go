@@ -11,29 +11,26 @@ type UserData struct {
 }
 
 type UserReviews struct {
-	Reviews []AnimeUserReview `json:"reviews"`
+	Reviews []Review `json:"reviews"`
 }
 
 type AnimeResponse struct {
 	Anime      json.RawMessage `json:"anime"`
 	IsInList   bool            `json:"isInList"`
 	IsFavorite bool            `json:"isFavorite"`
-	Reviews    []Reviews       `json:"reviews"`
+	Reviews    []Review        `json:"reviews"`
 }
 
-type AnimeUserReview struct {
-	ID         int    `json:"id"`
-	UserID     int    `json:"user_id"`
-	AnimeID    int    `json:"anime_id"`
-	AnimeTitle string `json:"anime_title"`
-	AnimeImage string `json:"anime_image"`
-	Content    string `json:"content"`
-	Rating     int    `json:"rating"`
-	CreatedAt  string `json:"created_at"`
-}
-
-type RequestBody struct {
+type RequestAddAnimeBody struct {
 	AnimeID int `json:"anime_id"`
+}
+
+type RequestUpdateEpisode struct {
+	Delta int `json:"delta"`
+}
+
+type RequestUpdateAnimeStatus struct {
+	Status string `json:"status"`
 }
 
 type AnimeJikanResponse struct {
@@ -45,7 +42,7 @@ type MeResponse struct {
 	Username string `json:"username"`
 }
 
-type ReviewBody struct {
+type RequestAddReviewBody struct {
 	AnimeID int    `json:"anime_id"`
 	Content string `json:"content"`
 	Rating  int    `json:"rating"`

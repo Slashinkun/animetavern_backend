@@ -13,7 +13,7 @@ func GetUserByID(userID int) (bool, error) {
 	err := database.DB.QueryRow(query, userID).Scan(&exists)
 
 	if err != nil {
-		fmt.Println("Erreur SQL:", err)
+		fmt.Println("SQL error:", err)
 		return false, err
 	}
 
@@ -29,7 +29,8 @@ func GetUserData(userID int) (models.UserData, error) {
 	username, err := GetUsername(userID)
 
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
+		return data, err
 	}
 	data.Username = username
 
@@ -40,7 +41,7 @@ func GetUserData(userID int) (models.UserData, error) {
 
 	rowsList, err := database.DB.Query(queryList, userID)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return data, err
 
 	}
@@ -78,33 +79,39 @@ func GetUserData(userID int) (models.UserData, error) {
 
 }
 
-//A FAIRE ???
-// func GetAnimeReviews(animeID int) (models.AnimeReviews,error){
-
-// }
-
 func GetUserReviews(userID int) (models.UserReviews, error) {
+
 	var data models.UserReviews
-	data.Reviews = []models.AnimeUserReview{}
+
+	data.Reviews = []models.Review{}
 
 	query := `
-		SELECT 
-			r.id, r.user_id, r.anime_id,
-    		r.content, r.rating, r.created_at,
-    		a.title, a.image
-		FROM reviews r
-		JOIN anime a ON r.anime_id = a.id
-		WHERE r.user_id = $1;`
+	SELECT 
+		r.id,
+		r.user_id,
+		r.anime_id,
+		r.content,
+		r.rating,
+		r.created_at,
+		a.title,
+		a.image
+	FROM reviews r
+	JOIN anime a ON r.anime_id = a.id
+	WHERE r.user_id = $1
+	ORDER BY r.created_at DESC
+	`
 
 	rows, err := database.DB.Query(query, userID)
 
 	if err != nil {
 		return data, err
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {
-		var review models.AnimeUserReview
+
+		var review models.Review
 
 		err := rows.Scan(
 			&review.ID,
@@ -116,6 +123,7 @@ func GetUserReviews(userID int) (models.UserReviews, error) {
 			&review.AnimeTitle,
 			&review.AnimeImage,
 		)
+
 		if err != nil {
 			return data, err
 		}
@@ -128,6 +136,46 @@ func GetUserReviews(userID int) (models.UserReviews, error) {
 	}
 
 	return data, nil
+}
+
+func UpdateEpisodes(userId int, animeId int, delta int) (models.UserAnime, error) {
+
+	query := `
+	UPDATE user_anime
+	SET viewed_episodes = GREATEST(viewed_episodes + $1, 0)
+	WHERE user_id = $2 AND anime_id = $3
+	RETURNING anime_id, viewed_episodes, status
+	`
+
+	var result models.UserAnime
+
+	err := database.DB.QueryRow(query, delta, userId, animeId).Scan(
+		&result.ID,
+		&result.ViewedEpisodes,
+		&result.Status,
+	)
+
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func UpdateAnimeStatus(userId int, animeId int, status string) (string, error) {
+
+	query := `
+	UPDATE user_anime
+	SET status = $1
+	WHERE user_id = $2 AND anime_id = $3
+	RETURNING status
+	`
+
+	var newStatus string
+
+	err := database.DB.QueryRow(query, status, userId, animeId).Scan(&newStatus)
+
+	return newStatus, err
 }
 
 func GetUsername(userId int) (string, error) {

@@ -19,15 +19,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Println(query)
-
 	url := "https://api.jikan.moe/v4/anime?q=" + url.QueryEscape(query) + "&limit=10&sfw"
-
-	//fmt.Println(url)
 
 	resp, err := http.Get(url)
 
-	//fmt.Println(resp)
 	if err != nil {
 		http.Error(w, "Server error", http.StatusBadGateway)
 		return

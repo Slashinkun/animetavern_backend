@@ -82,11 +82,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	// fmt.Println("SET COOKIE:")
-	// fmt.Println("Domain:", http.Cookie{
-	// 	Name: "session_token",
-	// }.Domain)
-
 }
 
 // deconnection
@@ -100,17 +95,13 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
 	})
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Logged out"))
 }
 
 // pour l'authentification
 func MeHandler(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
 
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)

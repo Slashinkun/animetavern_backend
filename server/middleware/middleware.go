@@ -6,7 +6,6 @@ import (
 	"main/contextkeys"
 	"main/services"
 	"net/http"
-	"reflect"
 )
 
 // filtre invité/connecté mais pas proprio de la page/ proprio de la page
@@ -45,8 +44,6 @@ func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		//fmt.Println("Cookies:", r.Cookies())
-
 		if r.Method == http.MethodOptions {
 			next.ServeHTTP(w, r)
 			return
@@ -65,7 +62,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		fmt.Println("userId type:", reflect.TypeOf(userId), "value:", userId)
+		//fmt.Println("userId type:", reflect.TypeOf(userId), "value:", userId)
 
 		ctx := context.WithValue(r.Context(), contextkeys.UserID, userId)
 		next.ServeHTTP(w, r.WithContext(ctx))

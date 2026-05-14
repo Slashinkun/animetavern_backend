@@ -26,9 +26,14 @@ type UserAnime struct {
 	Status         string `json:"status"`
 }
 
-type Reviews struct {
-	ID        int    `json:"id"`
-	UserID    int    `json:"user_id"`
+type Review struct {
+	ID      int `json:"id"`
+	UserID  int `json:"user_id"`
+	AnimeID int `json:"anime_id"`
+
+	AnimeTitle string `json:"anime_title,omitempty"`
+	AnimeImage string `json:"anime_image,omitempty"`
+
 	Content   string `json:"content"`
 	Rating    int    `json:"rating"`
 	CreatedAt string `json:"created_at"`

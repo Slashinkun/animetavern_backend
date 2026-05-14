@@ -3,38 +3,18 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"main/contextkeys"
 	"main/models"
 	"main/services"
+	"main/utils"
 	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 // page utilisateur
 func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
-	//preflight
-	if r.Method == http.MethodOptions {
-		//w.WriteHeader(http.StatusOK)
-		return
-	}
-
 	//on recuperer l'id dans l'url
-	vars := mux.Vars(r)
-
-	// fmt.Println("vars:", vars)
-	// fmt.Println("id string:", vars["id"])
-
-	idStr, ok := vars["id"]
-	if !ok || idStr == "" {
-		http.Error(w, "missing id", http.StatusBadRequest)
-		return
-	}
-
-	userId, err := strconv.Atoi(idStr)
+	userId, err := utils.GetIntParam(r, "id")
 	if err != nil {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
@@ -61,7 +41,7 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	isUser := (currentUserID == userId)
 
-	fmt.Printf("page id : %d  currentid : %d \n", userId, currentUserID)
+	//fmt.Printf("page id : %d  currentid : %d \n", userId, currentUserID)
 
 	//récupération des données et construction de la reponse
 	userData, err := services.GetUserData(userId)
@@ -78,6 +58,7 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 		IsUser:   isUser,
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 
@@ -86,22 +67,9 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 // page des reviews ecrit par l'utilisateur
 func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
 
-	//preflight
-	if r.Method == http.MethodOptions {
-		//w.WriteHeader(http.StatusOK)
-		return
-	}
-
 	//on recuperer l'id dans l'url
-	vars := mux.Vars(r)
 
-	idStr, ok := vars["id"]
-	if !ok || idStr == "" {
-		http.Error(w, "missing id", http.StatusBadRequest)
-		return
-	}
-
-	userId, err := strconv.Atoi(idStr)
+	userId, err := utils.GetIntParam(r, "id")
 	if err != nil {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
@@ -124,23 +92,26 @@ func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddAnimeToUserList(w http.ResponseWriter, r *http.Request) {
-	var body models.RequestBody
-
-	//fmt.Println("REQUEST COOKIES:", r.Cookies())
+	var body models.RequestAddAnimeBody
 
 	//on recupere l'id depuis les cookies
-	userId, ok := r.Context().Value(contextkeys.UserID).(int)
-
-	//fmt.Println(userId)
+	userId, ok := utils.GetUserID(r)
 
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&body)
+	err := utils.DecodeJSON(r, &body)
 	if err != nil {
 		http.Error(w, "Invalid body", http.StatusBadRequest)
+		return
+	}
+
+	err = utils.ValidateAddAnimeBody(body)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -151,16 +122,13 @@ func AddAnimeToUserList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("[INFO] : Trying adding anime with id " + strconv.Itoa(body.AnimeID) + " for user " + strconv.Itoa(userId))
-
 	err = services.AddAnimeToUserList(userId, body.AnimeID)
 	if err != nil {
 		http.Error(w, "Failed to add anime", http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Println("[INFO] : Anime " + strconv.Itoa(body.AnimeID) + " successfuly added for user " + strconv.Itoa(userId))
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Anime added",
@@ -170,24 +138,13 @@ func AddAnimeToUserList(w http.ResponseWriter, r *http.Request) {
 
 func RemoveAnimeFromList(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-
-	// fmt.Println("vars:", vars)
-	// fmt.Println("id string:", vars["id"])
-
-	idStr, ok := vars["id"]
-	if !ok || idStr == "" {
-		http.Error(w, "missing id", http.StatusBadRequest)
-		return
-	}
-
-	animeId, err := strconv.Atoi(idStr)
+	animeId, err := utils.GetIntParam(r, "id")
 	if err != nil {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 
-	userId, ok := r.Context().Value(contextkeys.UserID).(int)
+	userId, ok := utils.GetUserID(r)
 
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -196,7 +153,7 @@ func RemoveAnimeFromList(w http.ResponseWriter, r *http.Request) {
 
 	exists := services.IsAnimeInUserList(userId, animeId)
 	if !exists {
-		http.Error(w, "Anime not in list", http.StatusConflict)
+		http.Error(w, "Anime not in list", http.StatusNotFound)
 		return
 	}
 
@@ -207,4 +164,101 @@ func RemoveAnimeFromList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func UpdateEpisodes(w http.ResponseWriter, r *http.Request) {
+	var body models.RequestUpdateEpisode
+
+	animeId, err := utils.GetIntParam(r, "id")
+
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := utils.GetUserID(r)
+
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	exists := services.IsAnimeInUserList(userId, animeId)
+	if !exists {
+		http.Error(w, "Anime not in list", http.StatusNotFound)
+		return
+	}
+
+	err = utils.DecodeJSON(r, &body)
+	if err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	err = utils.ValidateUpdateEpisodeBody(body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	updated, err := services.UpdateEpisodes(userId, animeId, body.Delta)
+
+	if err != nil {
+		http.Error(w, "Cannot update episode counter", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"viewed_episodes": updated,
+	})
+}
+
+func UpdateAnimeStatus(w http.ResponseWriter, r *http.Request) {
+
+	var body models.RequestUpdateAnimeStatus
+
+	animeId, err := utils.GetIntParam(r, "id")
+
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := utils.GetUserID(r)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	exists := services.IsAnimeInUserList(userId, animeId)
+	if !exists {
+		http.Error(w, "Anime not in list", http.StatusNotFound)
+		return
+	}
+
+	err = utils.DecodeJSON(r, &body)
+	if err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	err = utils.ValidateAnimeStatusBody(body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newStatus, err := services.UpdateAnimeStatus(userId, animeId, body.Status)
+	if err != nil {
+		http.Error(w, "Cannot update status", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": newStatus,
+	})
 }
