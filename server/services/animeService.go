@@ -255,7 +255,7 @@ func GetAnimeFromJikan(animeId int) ([]byte, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error reading reponse Jikan: %w", err)
+		return nil, fmt.Errorf("error reading Jikan response: %w", err)
 	}
 
 	return body, nil

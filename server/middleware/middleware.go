@@ -29,7 +29,7 @@ func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		// connecté mais non prorio
 		userId, err := services.ValidateToken(cookie.Value)
 		if err != nil {
-			fmt.Println("pas connecté")
+			fmt.Println("not connected")
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -40,7 +40,7 @@ func OptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// filtre page/action protégé seul le proprio peut acceder/faire  a la page/ l'action
+// filtre page/action protégé seul le proprio peut acceder/faire à la page/ l'action
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
