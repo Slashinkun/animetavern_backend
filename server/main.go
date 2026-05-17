@@ -58,6 +58,8 @@ func main() {
 
 	router.HandleFunc("/user/anime/{id}/status", middleware.AuthMiddleware(handlers.UpdateAnimeStatus)).Methods("PATCH", "OPTIONS")
 
+	router.HandleFunc("/user/anime/{id}/favorite", middleware.AuthMiddleware(handlers.UpdateAnimeFavorite)).Methods("PATCH", "OPTIONS")
+
 	//auth
 	router.HandleFunc("/me", handlers.MeHandler).Methods("GET", "OPTIONS")
 

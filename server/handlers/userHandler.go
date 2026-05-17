@@ -262,3 +262,46 @@ func UpdateAnimeStatus(w http.ResponseWriter, r *http.Request) {
 		"status": newStatus,
 	})
 }
+
+func UpdateAnimeFavorite(w http.ResponseWriter, r *http.Request) {
+
+	var body models.RequestUpdateAnimeFavorite
+
+	animeId, err := utils.GetIntParam(r, "id")
+
+	if err != nil {
+		http.Error(w, "invalid anime id", http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := utils.GetUserID(r)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	exists := services.IsAnimeInUserList(userId, animeId)
+	if !exists {
+		http.Error(w, "Anime not in list", http.StatusNotFound)
+		return
+	}
+
+	err = utils.DecodeJSON(r, &body)
+	if err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	err = services.UpdateAnimeFavorite(userId, animeId, body.Favorite)
+	if err != nil {
+		http.Error(w, "Cannot update favorite", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"favorite": body.Favorite,
+	})
+
+}

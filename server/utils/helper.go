@@ -21,6 +21,10 @@ func ValidateAddAnimeBody(body models.RequestAddAnimeBody) error {
 	return nil
 }
 
+func ValidateUpdateFavoriteBody(body models.RequestUpdateAnimeFavorite) error {
+	return nil
+}
+
 func ValidateReviewBody(body models.RequestAddReviewBody) error {
 
 	if body.Rating < 0 || body.Rating > 10 {

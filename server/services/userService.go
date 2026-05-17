@@ -178,6 +178,18 @@ func UpdateAnimeStatus(userId int, animeId int, status string) (string, error) {
 	return newStatus, err
 }
 
+func UpdateAnimeFavorite(userId int, animeId int, favorite bool) error {
+	query := `
+		UPDATE user_anime
+		SET favorite = $1
+		WHERE user_id = $2 AND anime_id = $3
+	`
+
+	_, err := database.DB.Exec(query, favorite, userId, animeId)
+
+	return err
+}
+
 func GetUsername(userId int) (string, error) {
 	var username string
 

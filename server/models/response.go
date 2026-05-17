@@ -33,6 +33,10 @@ type RequestUpdateAnimeStatus struct {
 	Status string `json:"status"`
 }
 
+type RequestUpdateAnimeFavorite struct {
+	Favorite bool `json:"favorite"`
+}
+
 type AnimeJikanResponse struct {
 	Data AnimeData `json:"data"`
 }
