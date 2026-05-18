@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"main/contextkeys"
 	"main/models"
 	"main/services"
 	"main/utils"
@@ -18,7 +16,7 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	var inFavorite bool
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "Unautorized", http.StatusBadRequest)
+		http.Error(w, "Unauthorized", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -31,12 +29,16 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 
 	animedata, err := services.GetAnimeFromJikan(animeId)
 
+	if err != nil {
+		http.Error(w, "Jikan API error", http.StatusInternalServerError)
+		return
+	}
+
 	//on transforme la reponse de l'API faciliter la lecture
 	var resp models.AnimeJikanResponse
 	err = json.Unmarshal(animedata, &resp)
 	if err != nil {
-		fmt.Println("JSON error:", err)
-		http.Error(w, "Jikan API error", http.StatusInternalServerError)
+		http.Error(w, "Jikan parsing error", http.StatusInternalServerError)
 		return
 	}
 
@@ -45,15 +47,16 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	//on met l'anime dans le cache si il est pas deja dans le cache
 	services.PutAnimeInCache(animeId, anime.Title, anime.Images.JPG.ImageURL, anime.Episodes)
 
-	userId := -1
+	userId, ok := utils.GetUserID(r)
 
-	if v := r.Context().Value(contextkeys.UserID); v != nil {
-		if id, ok := v.(int); ok {
-			userId = id
-		}
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	}
 
 	inList = services.IsAnimeInUserList(userId, animeId)
+
+	inFavorite = services.IsAnimeUserFavorite(userId, animeId)
 
 	reviews, err := services.GetAnimeReviews(animeId)
 
