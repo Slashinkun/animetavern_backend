@@ -27,6 +27,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//recupere la valeur des champs du formulaire
 	email := r.FormValue("email")
 	username := r.FormValue("username")
 	password := r.FormValue("password")
@@ -54,7 +55,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 // POST /login
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	//recuperer la valeur des champs du formulaire
+	//recupere la valeur des champs du formulaire
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
