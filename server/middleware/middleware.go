@@ -62,8 +62,6 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		//fmt.Println("userId type:", reflect.TypeOf(userId), "value:", userId)
-
 		ctx := context.WithValue(r.Context(), contextkeys.UserID, userId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

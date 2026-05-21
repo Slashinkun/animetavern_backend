@@ -35,14 +35,10 @@ func Login(email, password string) (string, error) {
 		return "", fmt.Errorf("incorrect password")
 	}
 
-	//err = database.DB.QueryRow("SELECT username FROM users WHERE email=$1").Scan(&username)
-
 	token, err := createToken(userId)
 	if err != nil {
 		return "", err
 	}
-
-	//mt.Println(token)
 
 	return token, err
 }
@@ -103,15 +99,10 @@ func ValidateToken(tokenString string) (int, error) {
 		return secret, nil
 	})
 
-	// fmt.Println("CLAIMS:", claims)
-	// fmt.Println("USER_ID RAW:", claims["user_id"])
-
 	if err != nil {
 		return 0, err
 	}
 	userIDFloat, ok := claims["user_id"].(float64)
-
-	//fmt.Print(userIDFloat)
 
 	if !ok {
 		return 0, errors.New("user_id not found")

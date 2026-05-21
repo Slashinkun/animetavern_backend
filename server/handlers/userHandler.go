@@ -41,8 +41,6 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	isUser := (currentUserID == userId)
 
-	//fmt.Printf("page id : %d  currentid : %d \n", userId, currentUserID)
-
 	//récupération des données et construction de la reponse
 	userData, err := services.GetUserData(userId)
 	if err != nil {

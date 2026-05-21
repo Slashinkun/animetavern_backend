@@ -121,8 +121,6 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Println("Cookies:", r.Cookies())
-
 	userId, err := services.ValidateToken(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
