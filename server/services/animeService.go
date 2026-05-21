@@ -53,23 +53,14 @@ func IsAnimeUserFavorite(userID int, animeID int) bool {
 }
 
 // on met en cache les données de l'anime pour eviter de surcharger l'api de JIKAN (60 req par min)
-func PutAnimeInCache(animeID int, title string, image_url string, episodes int) {
-	var exists bool
+func PutAnimeInCache(animeID int, title string, imageURL string, episodes int) {
+	query := `
+		INSERT INTO anime (id, title, image, episodes)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (id) DO NOTHING
+	`
 
-	// vérifier si l'anime est déjà dans la DB
-	queryVerif := `SELECT EXISTS(SELECT 1 FROM anime WHERE id = $1)`
-	err := database.DB.QueryRow(queryVerif, animeID).Scan(&exists)
-	if err != nil {
-		fmt.Println("SQL error:", err)
-		return
-	}
-	if exists {
-		return
-	}
-
-	// insérer l'anime
-	query := `INSERT INTO anime (id, title, image, episodes) VALUES ($1, $2, $3, $4)`
-	_, err = database.DB.Exec(query, animeID, title, image_url, episodes)
+	_, err := database.DB.Exec(query, animeID, title, imageURL, episodes)
 	if err != nil {
 		fmt.Println("Error caching anime:", err)
 	}
