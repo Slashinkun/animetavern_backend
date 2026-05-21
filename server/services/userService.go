@@ -23,7 +23,7 @@ func GetUserByID(userID int) (bool, error) {
 // recuperer les infos de l'utlisateur pour sa page perso
 func GetUserData(userID int) (models.UserData, error) {
 	var data models.UserData
-	data.Animes = []models.UserAnime{}
+	data.Animes = []models.UserAnimeResponse{}
 	data.Favorites = []models.Anime{}
 
 	username, err := GetUsername(userID)
@@ -34,7 +34,7 @@ func GetUserData(userID int) (models.UserData, error) {
 	}
 	data.Username = username
 
-	queryList := `SELECT a.id, a.title, a.episodes, a.image, ua.viewed_episodes,ua.status
+	queryList := `SELECT a.id, a.title, a.episodes ,a.image, ua.viewed_episodes,ua.status
 				FROM anime a
 				JOIN user_anime ua ON a.id = ua.anime_id
 				WHERE ua.user_id = $1;`
@@ -48,7 +48,7 @@ func GetUserData(userID int) (models.UserData, error) {
 	defer rowsList.Close()
 
 	for rowsList.Next() {
-		var a models.UserAnime
+		var a models.UserAnimeResponse
 		if err := rowsList.Scan(&a.ID, &a.Title, &a.Episodes, &a.Image, &a.ViewedEpisodes, &a.Status); err != nil {
 			return data, err
 		}

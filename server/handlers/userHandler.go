@@ -13,7 +13,7 @@ import (
 // page utilisateur
 func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
-	//on recuperer l'id dans l'url
+	//on recupere l'id dans l'url
 	userId, err := utils.GetIntParam(r, "id")
 	if err != nil {
 		http.Error(w, "invalid id", http.StatusBadRequest)
@@ -62,7 +62,7 @@ func UserPageHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// page des reviews ecrit par l'utilisateur
+// page des reviews écrit par l'utilisateur
 func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
 
 	//on recuperer l'id dans l'url
@@ -92,7 +92,7 @@ func UserReviewsHandler(w http.ResponseWriter, r *http.Request) {
 func AddAnimeToUserList(w http.ResponseWriter, r *http.Request) {
 	var body models.RequestAddAnimeBody
 
-	//on recupere l'id depuis les cookies
+	//on regarde si l'utilisateur est connecté
 	userId, ok := utils.GetUserID(r)
 
 	if !ok {
@@ -209,7 +209,9 @@ func UpdateEpisodes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
-		"viewed_episodes": updated,
+		"mal_id":          updated.ID,
+		"viewed_episodes": updated.ViewedEpisodes,
+		"status":          updated.Status,
 	})
 }
 
@@ -256,7 +258,8 @@ func UpdateAnimeStatus(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	json.NewEncoder(w).Encode(map[string]any{
+		"mal_id": animeId,
 		"status": newStatus,
 	})
 }

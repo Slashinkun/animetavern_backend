@@ -20,6 +20,7 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//récuperation de l'id dans l'url
 	animeId, err := utils.GetIntParam(r, "anime_id")
 
 	if err != nil {
@@ -50,13 +51,12 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 	userId, ok := utils.GetUserID(r)
 
 	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
+		inList = false
+		inFavorite = false
+	} else {
+		inList = services.IsAnimeInUserList(userId, animeId)
+		inFavorite = services.IsAnimeUserFavorite(userId, animeId)
 	}
-
-	inList = services.IsAnimeInUserList(userId, animeId)
-
-	inFavorite = services.IsAnimeUserFavorite(userId, animeId)
 
 	reviews, err := services.GetAnimeReviews(animeId)
 
@@ -65,7 +65,7 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//on génere la réponse
+	//on construit la réponse
 	data := models.AnimeResponse{
 		Anime:      animedata,
 		IsInList:   inList,
@@ -80,6 +80,7 @@ func GetAnimePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(response)
 
@@ -89,6 +90,7 @@ func AddReview(w http.ResponseWriter, r *http.Request) {
 
 	var body models.RequestAddReviewBody
 
+	//vérification utilisateur connecté
 	userId, ok := utils.GetUserID(r)
 
 	if !ok {
@@ -133,6 +135,7 @@ func AddReview(w http.ResponseWriter, r *http.Request) {
 
 func RemoveReview(w http.ResponseWriter, r *http.Request) {
 
+	//récuperation de l'id dans l'url
 	reviewID, err := utils.GetIntParam(r, "id")
 
 	if err != nil {
@@ -140,6 +143,7 @@ func RemoveReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//vérification utilisateur connecté
 	userId, ok := utils.GetUserID(r)
 
 	if !ok {

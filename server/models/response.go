@@ -5,9 +5,9 @@ import "encoding/json"
 //Structures pour la réponse du serveur (et la réponse de l'API externe)
 
 type UserData struct {
-	Username  string      `json:"username"`
-	Animes    []UserAnime `json:"animes"`
-	Favorites []Anime     `json:"favoriteAnimes"`
+	Username  string              `json:"username"`
+	Animes    []UserAnimeResponse `json:"animes"`
+	Favorites []Anime             `json:"favoriteAnimes"`
 }
 
 type UserReviews struct {
@@ -19,6 +19,15 @@ type AnimeResponse struct {
 	IsInList   bool            `json:"isInList"`
 	IsFavorite bool            `json:"isFavorite"`
 	Reviews    []Review        `json:"reviews"`
+}
+
+type UserAnimeResponse struct {
+	ID             int    `json:"mal_id"`
+	Title          string `json:"title"`
+	Image          string `json:"image_url"`
+	Episodes       int    `json:"episodes"`
+	ViewedEpisodes int    `json:"viewed_episodes"`
+	Status         string `json:"status"`
 }
 
 type RequestAddAnimeBody struct {
