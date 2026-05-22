@@ -99,7 +99,7 @@ func RemoveAnimeFromUserList(userId int, animeId int) error {
 }
 
 // ajoute la review de l'utilisateur dans la base de données
-func AddReview(userID int, body models.RequestAddReviewBody) error {
+func AddReview(userID int, animeID int, body models.RequestAddReviewBody) error {
 
 	query := `
     INSERT INTO reviews (user_id, anime_id, content, rating)
@@ -107,7 +107,7 @@ func AddReview(userID int, body models.RequestAddReviewBody) error {
     ON CONFLICT (user_id, anime_id)
     DO UPDATE SET content = $3, rating = $4;`
 
-	_, err := database.DB.Exec(query, userID, body.AnimeID, body.Content, body.Rating)
+	_, err := database.DB.Exec(query, userID, animeID, body.Content, body.Rating)
 
 	return err
 }

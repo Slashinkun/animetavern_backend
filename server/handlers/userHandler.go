@@ -211,7 +211,6 @@ func UpdateEpisodes(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{
 		"mal_id":          updated.ID,
 		"viewed_episodes": updated.ViewedEpisodes,
-		"status":          updated.Status,
 	})
 }
 

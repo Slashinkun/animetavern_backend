@@ -90,6 +90,12 @@ func AddReview(w http.ResponseWriter, r *http.Request) {
 
 	var body models.RequestAddReviewBody
 
+	animeID, err := utils.GetIntParam(r, "id")
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
 	//vérification utilisateur connecté
 	userId, ok := utils.GetUserID(r)
 
@@ -98,7 +104,7 @@ func AddReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := utils.DecodeJSON(r, &body)
+	err = utils.DecodeJSON(r, &body)
 
 	if err != nil {
 		http.Error(w, "Invalid body", http.StatusBadRequest)
@@ -112,13 +118,13 @@ func AddReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists := services.AlreadyWroteReview(userId, body.AnimeID)
+	exists := services.AlreadyWroteReview(userId, animeID)
 	if exists {
 		http.Error(w, "Already wrote a review", http.StatusConflict)
 		return
 	}
 
-	err = services.AddReview(userId, body)
+	err = services.AddReview(userId, animeID, body)
 
 	if err != nil {
 		http.Error(w, "Error while adding review ", http.StatusInternalServerError)

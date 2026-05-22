@@ -56,7 +56,6 @@ type MeResponse struct {
 }
 
 type RequestAddReviewBody struct {
-	AnimeID int    `json:"anime_id"`
 	Content string `json:"content"`
 	Rating  int    `json:"rating"`
 }
