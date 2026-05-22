@@ -21,6 +21,8 @@ func main() {
 		println("Connecté à la DB")
 	}
 
+	database.InitTables()
+
 	router := mux.NewRouter()
 
 	router.Use(middleware.CORSMiddleware)
