@@ -4,7 +4,7 @@ Application web de suivi d’animés développée avec React, Go et PostgreSQL.
 
 ## Backend
 
-https://github.com/Slashinkun/animetavern_backend
+https://github.com/Slashinkun/animetavern_backend VOUS ÊTES ICI
 
 ## Frontend
 
