@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"main/database"
 	"main/handlers"
 	"main/middleware"
@@ -66,13 +67,12 @@ func main() {
 	//auth
 	router.HandleFunc("/me", handlers.MeHandler).Methods("GET", "OPTIONS")
 
-	fmt.Println("Serveur démarré sur le port 8080...")
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	fmt.Println(":" + port)
-	http.ListenAndServe(":"+port, router)
+	log.Println("0.0.0.0:" + port)
+	http.ListenAndServe("0.0.0.0:"+port, router)
+	fmt.Println("Serveur démarré sur le port " + "0.0.0.0:" + port)
 }
