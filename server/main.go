@@ -6,6 +6,7 @@ import (
 	"main/handlers"
 	"main/middleware"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -67,5 +68,10 @@ func main() {
 
 	fmt.Println("Serveur démarré sur le port 8080...")
 
-	http.ListenAndServe(":8080", router)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	http.ListenAndServe("0.0.0.0:"+port, router)
 }
