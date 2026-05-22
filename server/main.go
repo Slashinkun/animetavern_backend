@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"main/database"
 	"main/handlers"
 	"main/middleware"
@@ -74,6 +73,6 @@ func main() {
 		port = "8080"
 	}
 
-	log.Println("0.0.0.0:" + port)
-	http.ListenAndServe("0.0.0.0:"+port, router)
+	fmt.Println(":" + port)
+	http.ListenAndServe(":"+port, router)
 }
