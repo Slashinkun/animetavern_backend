@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"main/database"
 	"main/handlers"
 	"main/middleware"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -20,6 +21,8 @@ func main() {
 	} else {
 		println("Connecté à la DB")
 	}
+
+	database.InitTables()
 
 	router := mux.NewRouter()
 
@@ -63,7 +66,12 @@ func main() {
 	//auth
 	router.HandleFunc("/me", handlers.MeHandler).Methods("GET", "OPTIONS")
 
-	fmt.Println("Serveur démarré sur le port 8080...")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	http.ListenAndServe(":8080", router)
+	log.Println("0.0.0.0:" + port)
+	http.ListenAndServe("0.0.0.0:"+port, router)
+	log.Println("Serveur démarré sur le port " + "0.0.0.0:" + port)
 }
