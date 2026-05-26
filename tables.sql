@@ -1,15 +1,15 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    email TEXT NOT NULL,
-    username TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE anime (
     id INTEGER PRIMARY KEY,
-    title VARCHAR(50),
-    image VARCHAR(100),
+    title VARCHAR(255),
+    image VARCHAR TEXT,
     episodes INTEGER DEFAULT 0
 );    
 
