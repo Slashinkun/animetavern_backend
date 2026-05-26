@@ -25,7 +25,7 @@ CREATE TABLE user_anime (
     favorite BOOLEAN DEFAULT FALSE,
     viewed_episodes INTEGER DEFAULT 0,
 
-    CONSTRAINT unique_user_anime UNIQUE (user_id, anime_id)
+    CONSTRAINT unique_user_anime UNIQUE (user_id, anime_id),
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE
