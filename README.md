@@ -52,9 +52,6 @@ Linux :
 Windows :
 `psql -U myuser -h localhost -p 5432 -d animetavern_db`
 
-- Se connecter à animetavern_db : `\c animetavern_db`
-
-
 - Créer les tables de l’application :
 
 ```sql
