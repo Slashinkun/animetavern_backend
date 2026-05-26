@@ -40,7 +40,7 @@ CREATE TABLE reviews (
     rating INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (anime_id) REFERENCES anime(id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE,
     UNIQUE (user_id, anime_id)
 );
