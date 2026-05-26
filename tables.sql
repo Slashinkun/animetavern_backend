@@ -9,7 +9,7 @@ CREATE TABLE users (
 CREATE TABLE anime (
     id INTEGER PRIMARY KEY,
     title VARCHAR(255),
-    image VARCHAR TEXT,
+    image TEXT,
     episodes INTEGER DEFAULT 0
 );    
 
