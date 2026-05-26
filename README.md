@@ -38,16 +38,30 @@ Pour déployer l'application localement, veuillez suivre les instructions suivan
 
 - Verifier qu’elle a bien été crée : `\l`
 
+- Créer l’utilisateur myuser : `CREATE USER myuser WITH PASSWORD 'mypassword'`
+
+- Donner à myuser les permissions sur la base de données : `GRANT ALL PRIVILEGES ON DATABASE animetavern_db TO myuser;`;
+
+- Quitter PostgreSQL : `\q`
+
+- Se reconnecter avec myuser :
+
+Linux :
+`psql -U myuser -d animetavern_db`
+
+Windows :
+`psql -U myuser -h localhost -p 5432 -d animetavern_db`
+
 - Se connecter à animetavern_db : `\c animetavern_db`
-- Créer l’utilisateur myuser : `CREATE USER myuser WITH PASSWORD 'mypassword'`;
-- Donner à myuser les permissions sur la base de données : `ALTER DATABASE animetavern_db OWNER TO myuser`;
+
+
 - Créer les tables de l’application :
 
 ```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    email TEXT NOT NULL,
-    username TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -56,8 +70,8 @@ CREATE TABLE users (
 ```sql
 CREATE TABLE anime (
     id INTEGER PRIMARY KEY,
-    title VARCHAR(50),
-    image VARCHAR(100),
+    title VARCHAR(255),
+    image TEXT,
     episodes INTEGER DEFAULT 0
 );
 ```
