@@ -42,62 +42,7 @@ Linux :
 Windows :
 `psql -U myuser -h localhost -p 5432 -d animetavern_db`
 
-- Créer les tables de l’application :
-
-```sql
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    email TEXT NOT NULL UNIQUE,
-    username TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-```sql
-CREATE TABLE anime (
-    id INTEGER PRIMARY KEY,
-    title VARCHAR(255),
-    image TEXT,
-    episodes INTEGER DEFAULT 0
-);
-```
-
-```sql
-CREATE TABLE user_anime (
-    id SERIAL PRIMARY KEY,
-
-    user_id INTEGER NOT NULL,
-    anime_id INTEGER NOT NULL,
-
-    status VARCHAR(50) DEFAULT 'PLANNING',
-    note INTEGER,
-    favorite BOOLEAN DEFAULT FALSE,
-    viewed_episodes INTEGER DEFAULT 0,
-
-    CONSTRAINT unique_user_anime UNIQUE (user_id, anime_id),
-
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE
-
-);
-```
-
-```sql
-CREATE TABLE reviews (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    anime_id INTEGER NOT NULL,
-    content TEXT NOT NULL,
-    rating INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (anime_id) REFERENCES anime(id) ON DELETE CASCADE,
-    UNIQUE (user_id, anime_id)
-
-);
-```
+- Créer les tables de l’application contenu dans le fichier 'tables.sql'
 
 ## Serveur 
 
@@ -109,16 +54,8 @@ A l’aide d’un terminal, se mettre dans le répertoire du serveur : `cd /ser
 
 Installer les dépendances : `go mod tidy`
 
-Créer le fichier .env dans le répertoire du serveur avec ces paramètres :
-
-```
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=myuser
-DB_PASSWORD=mypassword
-DB_NAME=animetavern_db
-DB_SSLMODE=disable
-```
+Créer le fichier .env dans le répertoire du serveur 
+Attention, si il va falloir modifier le fichier go qui gère la connection à la base de données avec les identifiants que vous avez écrit dans le .env
 
 Vérifier que le serveur démarre : `go run main.go`
 
