@@ -24,23 +24,23 @@ Pour déployer l'application localement, veuillez suivre les instructions suivan
 
 - Demarrer postgreSQL en tant que postgres : `sudo -u postgres psql` (Linux) ou `psql -U postgres -h localhost -p 5432` (Windows)
 
-- Créer la base de données de l’application : `CREATE DATABASE animetavern_db;`
+- Créer la base de données de l’application : `CREATE DATABASE nom_de_la_db;`
 
 - Verifier qu’elle a bien été crée : `\l`
 
-- Créer l’utilisateur myuser : `CREATE USER myuser WITH PASSWORD 'mypassword'`
+- Créer l’utilisateur : `CREATE USER nom_utilisateur WITH PASSWORD 'mdpchoisi'`
 
-- Donner à myuser les permissions sur la base de données : `GRANT ALL PRIVILEGES ON DATABASE animetavern_db TO myuser;`;
+- Donner à myuser les permissions sur la base de données : `GRANT ALL PRIVILEGES ON DATABASE nom_de_la_db TO nom_utilisateur;`;
 
 - Quitter PostgreSQL : `\q`
 
-- Se reconnecter avec myuser :
+- Se reconnecter à la base de données avec le nom d'utilisateur que vous avez choisi :
 
 Linux :
-`psql -U myuser -d animetavern_db`
+`psql -U nom_utilisateur -d nom_de_la_db`
 
 Windows :
-`psql -U myuser -h localhost -p 5432 -d animetavern_db`
+`psql -U nom_utilisateur -h localhost -p 5432 -d nom_de_la_db`
 
 - Créer les tables de l’application contenu dans le fichier 'tables.sql'
 
@@ -54,8 +54,16 @@ A l’aide d’un terminal, se mettre dans le répertoire du serveur : `cd /ser
 
 Installer les dépendances : `go mod tidy`
 
-Créer le fichier .env dans le répertoire du serveur 
-Attention, si il va falloir modifier le fichier go qui gère la connection à la base de données avec les identifiants que vous avez écrit dans le .env
+Créer le fichier .env dans le répertoire du serveur avec les identifiants que vous avez choisi lors de la création de la base de données :
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=nom_utilisateur
+DB_PASSWORD=mdpchoisi
+DB_NAME=nom_de_la_db
+DB_SSLMODE=disable
+```
+
 
 Vérifier que le serveur démarre : `go run main.go`
 
