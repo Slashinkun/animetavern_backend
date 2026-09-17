@@ -44,7 +44,8 @@ Pour déployer le backend localement, veuillez suivre les instructions suivantes
 - Installer [Go] (https://go.dev/doc/install)
 
 - Cloner le repositoire : https://github.com/Slashinkun/animetavern_backend
-```git clone https://github.com/Slashinkun/animetavern_backend ```
+
+  ```git clone https://github.com/Slashinkun/animetavern_backend```
 
 - Se placer dans le répertoire du projet : `cd animetavern_backend`
 
