@@ -1,6 +1,8 @@
 # AnimeTavern
 
-Application web de suivi d’animés développée avec React, Go et PostgreSQL.
+Application web de suivi d’animés développée avec **React**, **Go** et **PostgreSQL**.
+
+Ce projet a été réalisé dans le cadre de l'UE **PC3R** à **Sorbonne Université**.
 
 ## Backend
 
